@@ -71,66 +71,64 @@ public class CircuitTracer {
 		// read in the CircuitBoard from the given file
 		try {
 			board = new CircuitBoard(args[2]);
+			// run the search for best paths
+			int x = board.getStartingPoint().x;
+			int y = board.getStartingPoint().y;
+
+			// Check right
+			if (board.isOpen(x + 1, y)) {
+				storage.store(new TraceState(board, x + 1, y));
+			}
+
+			// Check left
+			if (board.isOpen(x - 1, y)) {
+				storage.store(new TraceState(board, x - 1, y));
+			}
+
+			// Check up
+			if (board.isOpen(x, y + 1)) {
+				storage.store(new TraceState(board, x, y + 1));
+			}
+
+			// Check down
+			if (board.isOpen(x, y - 1)) {
+				storage.store(new TraceState(board, x, y - 1));
+			}
+
+			while (!storage.isEmpty()) {
+				TraceState currentState = storage.retrieve();
+
+				if (currentState.isSolution()) {
+					if (bestPaths.isEmpty() || currentState.pathLength() == bestPaths.get(0).pathLength()) {
+						bestPaths.add(currentState);
+					} else if (currentState.pathLength() < bestPaths.get(0).pathLength()) {
+						bestPaths.clear();
+						bestPaths.add(currentState);
+					}
+				}
+
+				else {
+					x = currentState.getRow();
+					y = currentState.getCol();
+
+					if (currentState.isOpen(x - 1, y)) {
+						storage.store(new TraceState(currentState, x - 1, y));
+					}
+					if (currentState.isOpen(x + 1, y)) {
+						storage.store(new TraceState(currentState, x + 1, y));
+					}
+					if (currentState.isOpen(x, y - 1)) {
+						storage.store(new TraceState(currentState, x, y - 1));
+					}
+					if (currentState.isOpen(x, y + 1)) {
+						storage.store(new TraceState(currentState, x, y + 1));
+					}
+				}
+			}
 		} catch (FileNotFoundException e) {
-			System.out.println(e + "File not found");
+			System.out.println(e + " File not found");
 		} catch (InvalidFileFormatException e) {
-			System.out.println(e + "Invalid file format");
-		}
-		// run the search for best paths
-		int x = board.getStartingPoint().x;
-		int y = board.getStartingPoint().y;
-		// TraceState startingState = new TraceState(board, x, y);
-		// storage.store(startingState);
-
-		// Check right
-		if (board.isOpen(x + 1, y)) {
-			storage.store(new TraceState(board, x + 1, y));
-		}
-
-		// Check left
-		if (board.isOpen(x - 1, y)) {
-			storage.store(new TraceState(board, x - 1, y));
-		}
-
-		// Check up
-		if (board.isOpen(x, y + 1)) {
-			storage.store(new TraceState(board, x, y + 1));
-		}
-
-		// Check down
-		if (board.isOpen(x, y - 1)) {
-			storage.store(new TraceState(board, x, y - 1));
-		}
-
-		while (!storage.isEmpty()) {
-			TraceState currentState = storage.retrieve();
-
-			if (currentState.isSolution()) {
-				if (bestPaths.isEmpty() || currentState.pathLength() == bestPaths.get(0).pathLength()) {
-					bestPaths.add(currentState);
-				} else if (currentState.pathLength() < bestPaths.get(0).pathLength()) {
-					bestPaths.clear();
-					bestPaths.add(currentState);
-				}
-			}
-
-			else {
-				x = currentState.getRow();
-				y = currentState.getCol();
-
-				if (currentState.isOpen(x - 1, y)) {
-					storage.store(new TraceState(currentState, x - 1, y));
-				}
-				if (currentState.isOpen(x + 1, y)) {
-					storage.store(new TraceState(currentState, x + 1, y));
-				}
-				if (currentState.isOpen(x, y - 1)) {
-					storage.store(new TraceState(currentState, x, y - 1));
-				}
-				if (currentState.isOpen(x, y + 1)) {
-					storage.store(new TraceState(currentState, x, y + 1));
-				}
-			}
+			System.out.println(e + " Invalid file format");
 		}
 
 		// Output results to console or GUI, according to specified choice
